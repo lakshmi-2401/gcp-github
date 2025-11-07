@@ -1,0 +1,8 @@
+az keyvault secret show `
+  --name "adminuser" `
+  --vault-name "ltesting" `
+  --query "value" `
+  --output tsv
+
+
+az keyvault secret show --name "admin" --vault-name "ltesting" --query "value" --output tsv
