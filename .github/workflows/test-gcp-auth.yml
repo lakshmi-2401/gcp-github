@@ -1,21 +1,24 @@
-name: Test Google Cloud Authentication
+name: List GCP Service Account Roles
 
 on:
-  workflow_dispatch:      # run manually from Actions tab
+  workflow_dispatch:      # Run manually from Actions tab
   push:
-    branches: [ "main" ]  # or the branch you allowed in Terraform
+    branches: [ "main" ]  # Optional trigger branch
 
 permissions:
   contents: read
   id-token: write         # REQUIRED for Workload Identity Federation
 
 jobs:
-  gcp-auth:
+  list-roles:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1 — Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2 — Authenticate to Google Cloud using WIF
       - name: Authenticate to Google Cloud (WIF)
         id: auth
         uses: google-github-actions/auth@v2
@@ -23,13 +26,17 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_SA_EMAIL }}
 
+      # Step 3 — Set up gcloud CLI
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: divine-apogee-477416-v4
 
-      - name: Verify Google Cloud access
+      # Step 4 — Display IAM roles of the Service Account
+      - name: List IAM roles of Service Account
         run: |
-          echo "✅ Successfully authenticated to GCP!"
-          echo "👉 Active credentials:"
-          gcloud auth list
-          echo "👉 Current project:"
-          gcloud config list project
+          echo "🔍 Fetching roles for: ${{ secrets.GCP_SA_EMAIL }}"
+          gcloud projects get-iam-policy divine-apogee-477416-v4 \
+            --flatten="bindings[].members" \
+            --format='table(bindings.role)' \
+            --filter="bindings.members:serviceAccount:${{ secrets.GCP_SA_EMAIL }}"
