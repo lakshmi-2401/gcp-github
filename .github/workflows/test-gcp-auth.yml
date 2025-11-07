@@ -35,7 +35,7 @@ jobs:
       # Step 4 — Display IAM roles of the Service Account
       - name: List IAM roles of Service Account
         run: |
-          echo "🔍 Fetching roles for: ${{ secrets.GCP_SA_EMAIL }}"
+          echo " Fetching roles for: ${{ secrets.GCP_SA_EMAIL }}"
           gcloud projects get-iam-policy divine-apogee-477416-v4 \
             --flatten="bindings[].members" \
             --format='table(bindings.role)' \
